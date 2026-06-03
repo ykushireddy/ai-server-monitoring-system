@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block title %}Alerts — Server Monitor{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+  <div>
+    <h1 class="h3 mb-1">Alert History</h1>
+    <p class="text-muted mb-0">Threshold and ML-detected alerts</p>
+  </div>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form id="alertFilters" class="row g-2 align-items-end">
+      <div class="col-md-2">
+        <label class="form-label small">Severity</label>
+        <select name="severity" class="form-select form-select-sm">
+          <option value="">All</option>
+          <option value="critical">Critical</option>
+          <option value="warning">Warning</option>
+          <option value="info">Info</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Status</label>
+        <select name="status" class="form-select form-select-sm">
+          <option value="">All</option>
+          <option value="active">Active</option>
+          <option value="acknowledged">Acknowledged</option>
+          <option value="resolved">Resolved</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Hours</label>
+        <select name="hours" class="form-select form-select-sm">
+          <option value="24" selected>24</option>
+          <option value="72">72</option>
+          <option value="168">168</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small">Metric</label>
+        <input type="text" name="metric" class="form-control form-control-sm" placeholder="cpu, memory…">
+      </div>
+      <div class="col-md-3">
+        <button type="submit" class="btn btn-primary btn-sm">Apply filters</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="row g-3 mb-3" id="alertStatsRow">
+  <div class="col-md-4"><div class="card"><div class="card-body text-center"><div class="text-muted small">Total</div><h3 id="statTotal">—</h3></div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body text-center"><div class="text-muted small">Critical</div><h3 class="text-danger" id="statCritical">—</h3></div></div></div>
+  <div class="col-md-4"><div class="card"><div class="card-body text-center"><div class="text-muted small">Active</div><h3 class="text-warning" id="statActive">—</h3></div></div></div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover mb-0">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Time</th>
+            <th>Severity</th>
+            <th>Metric</th>
+            <th>Value</th>
+            <th>Status</th>
+            <th>Message</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="alertsTableBody">
+          <tr><td colspan="8" class="text-center py-4 text-muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <span class="small text-muted" id="paginationInfo">—</span>
+    <div class="btn-group btn-group-sm">
+      <button type="button" class="btn btn-outline-secondary" id="prevPage" disabled>Previous</button>
+      <button type="button" class="btn btn-outline-secondary" id="nextPage" disabled>Next</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/alerts.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+{% block title %}Logs — Server Monitor{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h1 class="h3 mb-1">Application Logs</h1>
+  <p class="text-muted mb-0">Audit trail for metrics, alerts, ML training, and reports</p>
+</div>
+
+<div class="card mb-3">
+  <div class="card-body">
+    <form id="logFilters" class="row g-2 align-items-end">
+      <div class="col-md-3">
+        <label class="form-label small">Event type</label>
+        <select name="event_type" class="form-select form-select-sm" id="eventTypeSelect">
+          <option value="">All</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Severity</label>
+        <select name="severity" class="form-select form-select-sm">
+          <option value="">All</option>
+          <option value="debug">Debug</option>
+          <option value="info">Info</option>
+          <option value="warning">Warning</option>
+          <option value="error">Error</option>
+          <option value="critical">Critical</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <label class="form-label small">Hours</label>
+        <select name="hours" class="form-select form-select-sm">
+          <option value="24" selected>24</option>
+          <option value="72">72</option>
+          <option value="168">168</option>
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small">Search</label>
+        <input type="text" name="q" class="form-control form-control-sm" placeholder="Description…">
+      </div>
+      <div class="col-md-2">
+        <button type="submit" class="btn btn-primary btn-sm w-100">Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-sm table-hover mb-0 logs-table">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Severity</th>
+            <th>Event</th>
+            <th>Source</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody id="logsTableBody">
+          <tr><td colspan="5" class="text-center py-4 text-muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <span class="small text-muted" id="logsPaginationInfo">—</span>
+    <div class="btn-group btn-group-sm">
+      <button type="button" class="btn btn-outline-secondary" id="logsPrevPage" disabled>Previous</button>
+      <button type="button" class="btn btn-outline-secondary" id="logsNextPage" disabled>Next</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  let page = 1;
+  const perPage = 25;
+
+  function severityClass(s) {
+    return { critical: 'danger', error: 'danger', warning: 'warning', info: 'info', debug: 'secondary' }[s] || 'secondary';
+  }
+
+  function formatTime(iso) {
+    if (!iso) return '—';
+    return new Date(iso).toLocaleString();
+  }
+
+  async function loadLogs() {
+    const form = document.getElementById('logFilters');
+    const fd = new FormData(form);
+    const params = new URLSearchParams({ page, per_page: perPage });
+    ['event_type', 'severity', 'hours', 'q'].forEach((k) => {
+      const v = fd.get(k);
+      if (v) params.set(k, v);
+    });
+
+    const res = await fetch('/api/logs?' + params);
+    const json = await res.json();
+    const tbody = document.getElementById('logsTableBody');
+    if (!json.success) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-danger text-center">Failed to load logs</td></tr>';
+      return;
+    }
+
+    const types = json.event_types || [];
+    const select = document.getElementById('eventTypeSelect');
+    if (select.options.length <= 1) {
+      types.forEach((t) => {
+        const opt = document.createElement('option');
+        opt.value = t;
+        opt.textContent = t.replace(/_/g, ' ');
+        select.appendChild(opt);
+      });
+    }
+
+    if (!json.data.length) {
+      tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No logs found</td></tr>';
+    } else {
+      tbody.innerHTML = json.data.map((row) => `
+        <tr>
+          <td class="text-nowrap small">${formatTime(row.created_at)}</td>
+          <td><span class="badge bg-${severityClass(row.severity)}">${row.severity}</span></td>
+          <td class="small"><code>${row.event_type}</code></td>
+          <td class="small">${row.source || '—'}</td>
+          <td>${row.description}</td>
+        </tr>
+      `).join('');
+    }
+
+    const p = json.pagination;
+    document.getElementById('logsPaginationInfo').textContent =
+      `Page ${p.page} of ${p.pages || 1} (${p.total} total)`;
+    document.getElementById('logsPrevPage').disabled = !p.has_prev;
+    document.getElementById('logsNextPage').disabled = !p.has_next;
+  }
+
+  document.getElementById('logFilters').addEventListener('submit', (e) => {
+    e.preventDefault();
+    page = 1;
+    loadLogs();
+  });
+  document.getElementById('logsPrevPage').addEventListener('click', () => { if (page > 1) { page--; loadLogs(); } });
+  document.getElementById('logsNextPage').addEventListener('click', () => { page++; loadLogs(); });
+  loadLogs();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,82 @@
+:root {
+  --app-card-shadow: 0 0.125rem 0.5rem rgba(0, 0, 0, 0.06);
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+.app-navbar {
+  backdrop-filter: blur(8px);
+}
+
+[data-bs-theme="dark"] .app-navbar {
+  background-color: rgba(33, 37, 41, 0.95);
+}
+
+[data-bs-theme="light"] .app-navbar {
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.metric-card {
+  box-shadow: var(--app-card-shadow);
+  border: 1px solid var(--bs-border-color);
+  transition: transform 0.15s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-2px);
+}
+
+.metric-card h2 {
+  font-size: 1.75rem;
+  font-weight: 600;
+}
+
+.status-badge.status-healthy {
+  background-color: var(--bs-success) !important;
+}
+
+.status-badge.status-warning {
+  background-color: var(--bs-warning) !important;
+  color: #000 !important;
+}
+
+.status-badge.status-critical {
+  background-color: var(--bs-danger) !important;
+}
+
+.severity-critical {
+  color: var(--bs-danger);
+  font-weight: 600;
+}
+
+.severity-warning {
+  color: var(--bs-warning);
+}
+
+.severity-info {
+  color: var(--bs-info);
+}
+
+.logs-table td {
+  vertical-align: middle;
+}
+
+.card {
+  box-shadow: var(--app-card-shadow);
+}
+
+[data-bs-theme="dark"] .table {
+  --bs-table-bg: transparent;
+}
+
+[data-bs-theme="dark"] canvas {
+  filter: brightness(0.95);
+}

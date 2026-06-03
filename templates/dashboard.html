@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — Server Monitor{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+  <div>
+    <h1 class="h3 mb-1">Live Dashboard</h1>
+    <p class="text-muted mb-0">Real-time CPU, memory, disk, and network monitoring</p>
+  </div>
+  <div class="d-flex gap-2 align-items-center">
+    <label class="form-label mb-0 small text-muted" for="historyHours">Window</label>
+    <select id="historyHours" class="form-select form-select-sm" style="width: auto;">
+      <option value="1" selected>1 hour</option>
+      <option value="6">6 hours</option>
+      <option value="24">24 hours</option>
+    </select>
+    <span class="badge bg-secondary" id="lastUpdated">—</span>
+  </div>
+</div>
+
+<div class="row g-3 mb-4" id="summaryCards">
+  <div class="col-6 col-lg-3">
+    <div class="card metric-card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <span class="text-muted small">CPU</span>
+          <i class="bi bi-cpu text-primary"></i>
+        </div>
+        <h2 class="mb-0" id="cpuValue">—</h2>
+        <div class="progress mt-2" style="height: 6px;">
+          <div class="progress-bar bg-primary" id="cpuBar" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card metric-card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <span class="text-muted small">Memory</span>
+          <i class="bi bi-memory text-success"></i>
+        </div>
+        <h2 class="mb-0" id="memoryValue">—</h2>
+        <div class="progress mt-2" style="height: 6px;">
+          <div class="progress-bar bg-success" id="memoryBar" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card metric-card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <span class="text-muted small">Disk</span>
+          <i class="bi bi-hdd text-warning"></i>
+        </div>
+        <h2 class="mb-0" id="diskValue">—</h2>
+        <div class="progress mt-2" style="height: 6px;">
+          <div class="progress-bar bg-warning" id="diskBar" style="width: 0%"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-6 col-lg-3">
+    <div class="card metric-card h-100">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <span class="text-muted small">Health</span>
+          <i class="bi bi-heart-pulse text-danger"></i>
+        </div>
+        <h2 class="mb-0" id="healthValue">—</h2>
+        <p class="small text-muted mb-0 mt-1">Uptime: <span id="uptimeValue">—</span></p>
+        <p class="small text-muted mb-0">Active alerts: <span id="activeAlertsCount">0</span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-8">
+    <div class="card h-100">
+      <div class="card-header bg-transparent">Resource usage</div>
+      <div class="card-body">
+        <canvas id="metricsChart" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card h-100 mb-3">
+      <div class="card-header bg-transparent">Network throughput</div>
+      <div class="card-body">
+        <canvas id="networkChart" height="160"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3 mt-1">
+  <div class="col-12">
+    <div class="card">
+      <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+        <span>Recent active alerts</span>
+        <a href="{{ url_for('alerts.alerts_page') }}" class="btn btn-sm btn-outline-primary">View all</a>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Severity</th>
+                <th>Metric</th>
+                <th>Message</th>
+              </tr>
+            </thead>
+            <tbody id="recentAlertsBody">
+              <tr><td colspan="4" class="text-center text-muted py-4">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/charts.js') }}"></script>
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
