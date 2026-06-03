@@ -1,0 +1,27 @@
+services:
+  monitor:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_ENV: production
+      SECRET_KEY: change-me-in-production
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: change-me-in-production
+      MONITORING_INTERVAL: "10"
+      METRICS_RETENTION_DAYS: "30"
+      MAIL_SIMULATION_MODE: "true"
+    volumes:
+      - monitor_data:/app/database
+      - monitor_logs:/app/logs
+      - monitor_reports:/app/reports
+      - monitor_ml:/app/ml_artifacts
+    restart: unless-stopped
+
+volumes:
+  monitor_data:
+  monitor_logs:
+  monitor_reports:
+  monitor_ml:
